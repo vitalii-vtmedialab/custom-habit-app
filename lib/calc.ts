@@ -59,6 +59,8 @@ export function computeSession(input: SessionInput): SessionMetrics {
   const steps = Math.round((distanceMi * 63360) / stride);
   const weightKg = input.weightLb * 0.45359237;
   const met = metForSpeed(input.speedMph);
-  const calories = Math.round(met * weightKg * hours);
+  // Net (active) calories: subtract the 1 MET you'd burn at rest anyway,
+  // so this reflects only the extra burned from the activity.
+  const calories = Math.round((met - 1) * weightKg * hours);
   return { distanceMi: Math.round(distanceMi * 100) / 100, steps, calories };
 }
