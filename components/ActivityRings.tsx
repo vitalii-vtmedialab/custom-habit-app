@@ -36,30 +36,49 @@ function Ring({
   const over = progress > 1;
   const overflow = over ? Math.min(progress - 1, 1) : 0;
 
-  const arc = (offset: number, extra?: { filter: string }) => (
-    <circle
-      cx={cx}
-      cy={cx}
-      r={r}
-      fill="none"
-      stroke={stroke}
-      strokeWidth={width}
-      strokeLinecap="round"
-      strokeDasharray={C}
-      strokeDashoffset={offset}
-      transform={`rotate(-90 ${cx} ${cx})`}
-      className="ring-progress"
-      {...extra}
-    />
-  );
+  // Leading-head position for the overflow lap (clockwise from top).
+  const angle = 2 * Math.PI * overflow;
+  const hx = cx + r * Math.sin(angle);
+  const hy = cx - r * Math.cos(angle);
 
   return (
     <>
       <circle cx={cx} cy={cx} r={r} fill="none" stroke={track} strokeWidth={width} />
-      {/* first lap (full circle once goal is met) */}
-      {arc(C * (1 - base))}
-      {/* overflow lap, layered on top with a shadow on its leading head */}
-      {over && arc(C * (1 - overflow), { filter: `url(#${shadowId})` })}
+      {/* first lap — rounded head while filling, full circle once goal is met */}
+      <circle
+        cx={cx}
+        cy={cx}
+        r={r}
+        fill="none"
+        stroke={stroke}
+        strokeWidth={width}
+        strokeLinecap="round"
+        strokeDasharray={C}
+        strokeDashoffset={C * (1 - base)}
+        transform={`rotate(-90 ${cx} ${cx})`}
+        className="ring-progress"
+      />
+      {over && (
+        <g filter={`url(#${shadowId})`}>
+          {/* overflow lap floats over the first — flat start (no "new circle" seam),
+              rounded head, shadow along the whole lap for Apple-style depth */}
+          <circle
+            cx={cx}
+            cy={cx}
+            r={r}
+            fill="none"
+            stroke={stroke}
+            strokeWidth={width}
+            strokeLinecap="butt"
+            strokeDasharray={C}
+            strokeDashoffset={C * (1 - overflow)}
+            transform={`rotate(-90 ${cx} ${cx})`}
+            className="ring-progress"
+          />
+          {/* rounded leading head */}
+          <circle cx={hx} cy={hy} r={width / 2} fill={stroke} />
+        </g>
+      )}
     </>
   );
 }
@@ -89,7 +108,7 @@ export default function ActivityRings({
       <defs>
         {/* Soft shadow cast by the overflow head onto the lap beneath it. */}
         <filter id="ringOverflowShadow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="0.5" stdDeviation="2.4" floodColor="#000000" floodOpacity="0.35" />
+          <feDropShadow dx="0" dy="1.5" stdDeviation="3" floodColor="#000000" floodOpacity="0.4" />
         </filter>
       </defs>
       <Ring
