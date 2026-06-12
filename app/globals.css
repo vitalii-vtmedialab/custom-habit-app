@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-bg text-label font-sans antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* iOS-style large title */
+.large-title {
+  @apply text-[32px] font-bold tracking-[-0.4px] leading-tight;
+}
+
+/* Grouped card */
+.card {
+  @apply bg-card rounded-card shadow-card;
+}
+
+/* Inset grouped list row */
+.row {
+  @apply flex items-center gap-3 px-4 py-3;
+}
+.row + .row {
+  @apply border-t border-sep/70;
+}
+
+/* Section header above cards */
+.section-label {
+  @apply text-[13px] font-medium uppercase tracking-wide text-secondary px-4 mb-2;
+}
+
+/* iOS-style filled button */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-ios font-semibold
+    transition active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100;
+}
+.btn-primary {
+  @apply btn bg-blue text-white px-5 py-3 text-[16px];
+}
+.btn-gray {
+  @apply btn bg-[#E9E9EB] text-label px-5 py-3 text-[16px];
+}
+
+/* Inputs */
+.input {
+  @apply w-full rounded-ios bg-[#EFEFF0] px-4 py-3 text-[16px] outline-none
+    focus:ring-2 focus:ring-blue/40 placeholder:text-tertiary;
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Sheet slide-up */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-sheet {
+  animation: sheet-up 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade {
+  animation: fade-in 0.25s ease-out;
+}
+
+/* Ring progress animation */
+.ring-progress {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Scrollbar-less horizontal scroll */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
