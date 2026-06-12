@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { del } from "@vercel/blob";
+import { del, get } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { photos } from "@/lib/schema";
 
 export const dynamic = "force-dynamic";
 
-/** Authenticated proxy: streams the blob so its URL stays private. */
+/** Authenticated proxy: streams from the private Blob store. */
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,13 +14,14 @@ export async function GET(
   const { id } = await params;
   const rows = await db.select().from(photos).where(eq(photos.id, Number(id)));
   if (!rows.length) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const upstream = await fetch(rows[0].url);
-  if (!upstream.ok || !upstream.body) {
+  const result = await get(rows[0].pathname, { access: "private" });
+  if (!result || result.statusCode !== 200 || !result.stream) {
     return NextResponse.json({ error: "Blob fetch failed" }, { status: 502 });
   }
-  return new NextResponse(upstream.body, {
+  return new NextResponse(result.stream, {
     headers: {
-      "Content-Type": rows[0].contentType,
+      "Content-Type": result.blob.contentType ?? rows[0].contentType,
+      "X-Content-Type-Options": "nosniff",
       "Cache-Control": "private, max-age=31536000, immutable",
     },
   });

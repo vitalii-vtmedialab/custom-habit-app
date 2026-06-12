@@ -20,12 +20,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Max 15 MB" }, { status: 400 });
   }
   const blob = await put(`progress/${weighinId}/${Date.now()}-${file.name}`, file, {
-    access: "public", // unguessable URL; never exposed — served via authed proxy below
+    access: "private", // private store — only readable through the authed proxy
     addRandomSuffix: true,
   });
   const inserted = await db
     .insert(photos)
-    .values({ weighinId, url: blob.url, contentType: file.type })
+    .values({ weighinId, url: blob.url, pathname: blob.pathname, contentType: file.type })
     .returning();
   return NextResponse.json({ id: inserted[0].id });
 }

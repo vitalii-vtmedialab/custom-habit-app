@@ -45,13 +45,14 @@ export const weighins = pgTable("weighins", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-/** Progress photos stored in Vercel Blob; url is never exposed directly. */
+/** Progress photos in a private Vercel Blob store; served via authed proxy. */
 export const photos = pgTable("photos", {
   id: serial("id").primaryKey(),
   weighinId: integer("weighin_id")
     .notNull()
     .references(() => weighins.id, { onDelete: "cascade" }),
   url: text("url").notNull(),
+  pathname: text("pathname").notNull().default(""),
   contentType: text("content_type").notNull().default("image/jpeg"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
