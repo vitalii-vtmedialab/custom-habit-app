@@ -75,7 +75,7 @@ export default function TodayPage() {
           <div className="flex flex-col gap-3">
             <div>
               <div className="text-[13px] font-medium text-secondary">Steps</div>
-              <div className="text-[22px] font-bold leading-tight text-[#24A148]">
+              <div className="text-[22px] font-bold leading-tight text-[#5E8A4F]">
                 {data.steps.toLocaleString()}
                 <span className="text-[14px] font-semibold text-tertiary">
                   {" "}/ {prof.stepGoal.toLocaleString()}
@@ -107,7 +107,7 @@ export default function TodayPage() {
       <div className="card">
         {/* Step goal — auto, locked until met */}
         <div className="row">
-          <HabitIcon icon="footprints" color="#34C759" />
+          <HabitIcon icon="footprints" color="#7FAE74" />
           <div className="min-w-0 flex-1">
             <div className="text-[16px] font-medium">Hit step goal</div>
             <div className="flex items-center gap-1 text-[13px] text-secondary">

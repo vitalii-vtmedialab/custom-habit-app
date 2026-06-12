@@ -2,21 +2,41 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import BarChart from "@/components/BarChart";
+import BarChart, { type BarDatum } from "@/components/BarChart";
 import SegmentedControl from "@/components/SegmentedControl";
 import { WalkSheet } from "@/components/LogSheets";
-import { addDays, formatShort, rangeKeys, todayKey, weekStart } from "@/lib/dates";
+import {
+  addDays,
+  formatLong,
+  formatShort,
+  fromKey,
+  monthStart,
+  rangeKeys,
+  todayKey,
+  toKey,
+  weekStart,
+} from "@/lib/dates";
 import type { Profile, Session } from "@/lib/types";
 
-type Period = "week" | "month";
+type Period = "week" | "month" | "quarter" | "all";
 type Metric = "steps" | "calories" | "distanceMi" | "durationMin";
 
 const METRICS: { value: Metric; label: string; color: string; unit: string }[] = [
-  { value: "steps", label: "Steps", color: "#32D74B", unit: "" },
-  { value: "calories", label: "Cal", color: "#FF375F", unit: " cal" },
-  { value: "distanceMi", label: "Miles", color: "#30B0C7", unit: " mi" },
-  { value: "durationMin", label: "Time", color: "#FF9500", unit: " min" },
+  { value: "steps", label: "Steps", color: "#7FAE74", unit: "" },
+  { value: "calories", label: "Cal", color: "#E8A93C", unit: " cal" },
+  { value: "distanceMi", label: "Miles", color: "#5BA8A0", unit: " mi" },
+  { value: "durationMin", label: "Time", color: "#D98E5A", unit: " min" },
 ];
+
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const weekdayLabel = (key: string) => WEEKDAYS[(fromKey(key).getDay() + 6) % 7];
+const addMonths = (key: string, n: number) => {
+  const d = fromKey(key);
+  d.setMonth(d.getMonth() + n);
+  return toKey(d);
+};
+const monthLabel = (key: string, withYear: boolean) =>
+  fromKey(key).toLocaleDateString("en-US", { month: "short", ...(withYear ? { year: "2-digit" } : {}) });
 
 export default function ActivityPage() {
   const today = todayKey();
@@ -26,7 +46,15 @@ export default function ActivityPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [walkOpen, setWalkOpen] = useState(false);
 
-  const from = period === "week" ? weekStart(today) : addDays(today, -29);
+  // Fetch window. "all" pulls everything; we bucket client-side.
+  const from =
+    period === "week"
+      ? weekStart(today)
+      : period === "month"
+        ? addDays(today, -29)
+        : period === "quarter"
+          ? addDays(today, -90)
+          : "2000-01-01";
 
   const load = useCallback(async () => {
     const [s, p] = await Promise.all([
@@ -42,35 +70,79 @@ export default function ActivityPage() {
   }, [load]);
 
   const meta = METRICS.find((m) => m.value === metric)!;
+  const grouped = period === "quarter" || period === "all";
 
-  const daily = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const k of rangeKeys(from, today)) map.set(k, 0);
-    for (const s of sessions) {
-      map.set(s.date, (map.get(s.date) ?? 0) + (s[metric] as number));
+  // Bucketed chart data. Daily for week/30d, weekly for 3M, monthly for all-time.
+  const bars = useMemo<BarDatum[]>(() => {
+    const val = (s: Session) => s[metric] as number;
+    const round = (v: number) => (metric === "distanceMi" ? Math.round(v * 100) / 100 : Math.round(v));
+
+    if (period === "week" || period === "month") {
+      const map = new Map<string, number>();
+      for (const k of rangeKeys(from, today)) map.set(k, 0);
+      for (const s of sessions) if (map.has(s.date)) map.set(s.date, (map.get(s.date) ?? 0) + val(s));
+      return [...map.entries()].map(([date, v]) => ({
+        label: period === "week" ? weekdayLabel(date) : formatShort(date),
+        tip: formatLong(date),
+        value: round(v),
+      }));
     }
-    return [...map.entries()].map(([date, value]) => ({
-      date,
-      label:
-        period === "week"
-          ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][
-              (new Date(date + "T12:00:00").getDay() + 6) % 7
-            ]
-          : formatShort(date),
-      value: metric === "distanceMi" ? Math.round(value * 100) / 100 : Math.round(value),
+
+    if (period === "quarter") {
+      const keys: string[] = [];
+      const last = weekStart(today);
+      for (let w = weekStart(from); w <= last; w = addDays(w, 7)) keys.push(w);
+      const map = new Map(keys.map((k) => [k, 0]));
+      for (const s of sessions) {
+        const k = weekStart(s.date);
+        if (map.has(k)) map.set(k, (map.get(k) ?? 0) + val(s));
+      }
+      return keys.map((k) => ({
+        label: formatShort(k),
+        tip: `Week of ${formatShort(k)}`,
+        value: round(map.get(k) ?? 0),
+      }));
+    }
+
+    // all-time: monthly buckets from earliest session month to current
+    const earliest = sessions.length
+      ? sessions.reduce((min, s) => (s.date < min ? s.date : min), sessions[0].date)
+      : today;
+    const keys: string[] = [];
+    const last = monthStart(today);
+    for (let m = monthStart(earliest); m <= last; m = addMonths(m, 1)) keys.push(m);
+    const multiYear = keys.length > 0 && keys[0].slice(0, 4) !== last.slice(0, 4);
+    const map = new Map(keys.map((k) => [k, 0]));
+    for (const s of sessions) {
+      const k = monthStart(s.date);
+      if (map.has(k)) map.set(k, (map.get(k) ?? 0) + val(s));
+    }
+    return keys.map((k) => ({
+      label: monthLabel(k, multiYear),
+      tip: fromKey(k).toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+      value: round(map.get(k) ?? 0),
     }));
   }, [sessions, from, today, metric, period]);
 
-  const goal =
+  // Daily goal only maps onto daily views; hidden for weekly/monthly buckets.
+  const dailyGoal =
     metric === "steps" ? profile?.stepGoal : metric === "calories" ? profile?.calorieGoal : undefined;
+  const goal = grouped ? undefined : dailyGoal;
 
-  const total = daily.reduce((a, d) => a + d.value, 0);
-  const activeDays = daily.filter((d) => d.value > 0).length;
-  const avg = activeDays ? total / activeDays : 0;
-  const daysMet = goal ? daily.filter((d) => d.value >= goal).length : null;
+  const total = bars.reduce((a, d) => a + d.value, 0);
+  const activeBuckets = bars.filter((d) => d.value > 0).length;
+  const avg = activeBuckets ? total / activeBuckets : 0;
+  const daysMet = goal ? bars.filter((d) => d.value >= goal).length : null;
+
+  const avgLabel =
+    period === "quarter" ? "Avg / active wk" : period === "all" ? "Avg / active mo" : "Avg / active day";
+  const countLabel =
+    period === "quarter" ? "Active wks" : period === "all" ? "Active mos" : "Active days";
 
   const fmt = (v: number) =>
-    metric === "distanceMi" ? (Math.round(v * 10) / 10).toLocaleString() : Math.round(v).toLocaleString();
+    metric === "distanceMi"
+      ? (Math.round(v * 10) / 10).toLocaleString()
+      : Math.round(v).toLocaleString();
 
   return (
     <div>
@@ -79,8 +151,10 @@ export default function ActivityPage() {
       <div className="mb-3 flex flex-col gap-2">
         <SegmentedControl
           options={[
-            { value: "week", label: "This Week" },
+            { value: "week", label: "Week" },
             { value: "month", label: "30 Days" },
+            { value: "quarter", label: "3 Months" },
+            { value: "all", label: "All Time" },
           ]}
           value={period}
           onChange={setPeriod}
@@ -93,22 +167,22 @@ export default function ActivityPage() {
       </div>
 
       <div className="card mb-3 p-4">
-        <BarChart data={daily} goal={goal ?? undefined} color={meta.color} formatValue={fmt} />
+        <BarChart data={bars} goal={goal ?? undefined} color={meta.color} formatValue={fmt} />
         <div className="mt-3 grid grid-cols-3 divide-x divide-sep/70 text-center">
           <div>
             <div className="text-[12px] font-medium text-secondary">Total</div>
             <div className="text-[17px] font-bold">{fmt(total)}{meta.unit}</div>
           </div>
           <div>
-            <div className="text-[12px] font-medium text-secondary">Avg / active day</div>
+            <div className="text-[12px] font-medium text-secondary">{avgLabel}</div>
             <div className="text-[17px] font-bold">{fmt(avg)}{meta.unit}</div>
           </div>
           <div>
             <div className="text-[12px] font-medium text-secondary">
-              {daysMet != null ? "Goal met" : "Active days"}
+              {daysMet != null ? "Goal met" : countLabel}
             </div>
             <div className="text-[17px] font-bold">
-              {daysMet != null ? `${daysMet} d` : `${activeDays} d`}
+              {daysMet != null ? `${daysMet} d` : `${activeBuckets}`}
             </div>
           </div>
         </div>

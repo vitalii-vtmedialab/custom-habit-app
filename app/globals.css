@@ -49,12 +49,12 @@ body {
   @apply btn bg-blue text-white px-5 py-3 text-[16px];
 }
 .btn-gray {
-  @apply btn bg-[#E9E9EB] text-label px-5 py-3 text-[16px];
+  @apply btn bg-[#ECE6DA] text-label px-5 py-3 text-[16px];
 }
 
 /* Inputs */
 .input {
-  @apply w-full rounded-ios bg-[#EFEFF0] px-4 py-3 text-[16px] outline-none
+  @apply w-full rounded-ios bg-[#EDE8DC] px-4 py-3 text-[16px] outline-none
     focus:ring-2 focus:ring-blue/40 placeholder:text-tertiary;
 }
 

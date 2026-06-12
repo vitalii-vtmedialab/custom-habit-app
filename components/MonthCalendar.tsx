@@ -10,7 +10,7 @@ import { fromKey, toKey, todayKey } from "@/lib/dates";
  */
 export default function MonthCalendar({
   status,
-  color = "#34C759",
+  color = "#7FAE74",
   onMonthChange,
 }: {
   status: (dateKey: string) => "done" | "partial" | "missed" | "off";

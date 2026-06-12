@@ -11,11 +11,11 @@ import type { Weighin } from "@/lib/types";
 type Series = "weightLb" | "bellyIn" | "chestIn" | "armIn" | "neckIn";
 
 const SERIES: { value: Series; label: string; unit: string; color: string }[] = [
-  { value: "weightLb", label: "Weight", unit: " lb", color: "#007AFF" },
-  { value: "bellyIn", label: "Belly", unit: "″", color: "#FF9500" },
-  { value: "chestIn", label: "Chest", unit: "″", color: "#5856D6" },
-  { value: "armIn", label: "Arm", unit: "″", color: "#30B0C7" },
-  { value: "neckIn", label: "Neck", unit: "″", color: "#FF2D55" },
+  { value: "weightLb", label: "Weight", unit: " lb", color: "#C17A47" },
+  { value: "bellyIn", label: "Belly", unit: "″", color: "#D98E5A" },
+  { value: "chestIn", label: "Chest", unit: "″", color: "#8A7BB5" },
+  { value: "armIn", label: "Arm", unit: "″", color: "#5BA8A0" },
+  { value: "neckIn", label: "Neck", unit: "″", color: "#C96F8A" },
 ];
 
 export default function BodyPage() {

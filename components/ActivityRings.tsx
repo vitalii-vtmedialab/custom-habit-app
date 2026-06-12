@@ -71,8 +71,8 @@ export default function ActivityRings({
       role="img"
       aria-label={`Steps ${steps} of ${stepGoal}, calories ${calories} of ${calorieGoal}`}
     >
-      <Ring cx={c} r={rOuter} stroke="#32D74B" track="#E8F9EC" progress={stepPct} width={w} />
-      <Ring cx={c} r={rInner} stroke="#FF375F" track="#FFE9ED" progress={calPct} width={w} />
+      <Ring cx={c} r={rOuter} stroke="#7FAE74" track="#ECF3E9" progress={stepPct} width={w} />
+      <Ring cx={c} r={rInner} stroke="#E8A93C" track="#FAF0DA" progress={calPct} width={w} />
     </svg>
   );
 }

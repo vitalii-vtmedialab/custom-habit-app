@@ -41,7 +41,7 @@ export default function HabitsPage() {
       <div className="section-label">Built-in</div>
       <div className="card mb-6">
         <button className="row w-full text-left" onClick={() => setBuiltin("steps")}>
-          <HabitIcon icon="footprints" color="#34C759" />
+          <HabitIcon icon="footprints" color="#7FAE74" />
           <div className="min-w-0 flex-1">
             <div className="text-[16px] font-medium">Hit step goal</div>
             <div className="flex items-center gap-1 text-[13px] text-secondary">
@@ -364,7 +364,7 @@ function StepsDetailSheet({ stepGoal, onClose }: { stepGoal: number; onClose: ()
         goal in Settings.
       </p>
       <div className="card p-4">
-        <MonthCalendar status={status} color="#34C759" onMonthChange={setMonth} />
+        <MonthCalendar status={status} color="#7FAE74" onMonthChange={setMonth} />
       </div>
     </Sheet>
   );

@@ -5,22 +5,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Apple HIG light palette
-        bg: "#F2F2F7", // systemGroupedBackground
+        // Warm earthy palette — sage, honey, terracotta on a soft cream base
+        bg: "#F4F1E9", // warm cream grouped background
         card: "#FFFFFF",
-        sep: "#E5E5EA",
-        label: "#000000",
-        secondary: "#8E8E93",
-        tertiary: "#C7C7CC",
-        blue: "#007AFF",
-        green: "#34C759",
-        red: "#FF3B30",
-        orange: "#FF9500",
-        teal: "#30B0C7",
-        indigo: "#5856D6",
-        pink: "#FF2D55",
-        ringMove: "#FF375F", // calories ring
-        ringStep: "#32D74B", // steps ring (slightly brighter for white bg contrast)
+        sep: "#E8E1D3",
+        label: "#29251E", // warm near-black
+        secondary: "#978A75",
+        tertiary: "#C8BDA9",
+        blue: "#5E9A6F", // repurposed as primary accent (sage green)
+        green: "#6FA363",
+        red: "#C75B43", // earthy terracotta-red (destructive)
+        orange: "#D98E5A", // terracotta
+        teal: "#5BA8A0",
+        indigo: "#8A7BB5", // muted plum
+        pink: "#C96F8A",
+        ringMove: "#E8A93C", // calories ring (honey)
+        ringStep: "#7FAE74", // steps ring (sage)
+        // explicit earthy accents for new code
+        sage: "#7FAE74",
+        honey: "#E8A93C",
+        terracotta: "#D98E5A",
+        clay: "#C17A47",
+        forest: "#5E9A6F",
+        cream: "#F4F1E9",
       },
       fontFamily: {
         sans: [

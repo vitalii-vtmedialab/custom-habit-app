@@ -3,7 +3,7 @@
 /** Smooth line chart for weight/measurement trends. */
 export default function LineChart({
   points,
-  color = "#007AFF",
+  color = "#C17A47",
   height = 180,
   unit = "",
 }: {

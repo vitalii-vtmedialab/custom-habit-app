@@ -30,14 +30,14 @@ export const HABIT_ICONS: Record<string, LucideIcon> = {
 };
 
 export const HABIT_COLORS = [
-  "#007AFF",
-  "#34C759",
-  "#FF9500",
-  "#FF3B30",
-  "#5856D6",
-  "#FF2D55",
-  "#30B0C7",
-  "#A2845E",
+  "#7FAE74", // sage
+  "#E8A93C", // honey
+  "#D98E5A", // terracotta
+  "#C75B43", // clay red
+  "#8A7BB5", // plum
+  "#C96F8A", // dusty rose
+  "#5BA8A0", // teal-green
+  "#A2845E", // warm brown
 ];
 
 export default function HabitIcon({
