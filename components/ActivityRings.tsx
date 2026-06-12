@@ -59,9 +59,8 @@ function Ring({
         className="ring-progress"
       />
       {over && (
-        <g filter={`url(#${shadowId})`}>
-          {/* overflow lap floats over the first — flat start (no "new circle" seam),
-              rounded head, shadow along the whole lap for Apple-style depth */}
+        <>
+          {/* overflow lap continues the same stroke — flat start, no seam, no shadow */}
           <circle
             cx={cx}
             cy={cx}
@@ -75,9 +74,9 @@ function Ring({
             transform={`rotate(-90 ${cx} ${cx})`}
             className="ring-progress"
           />
-          {/* rounded leading head */}
-          <circle cx={hx} cy={hy} r={width / 2} fill={stroke} />
-        </g>
+          {/* only the leading head casts a shadow, where it rides over the first lap */}
+          <circle cx={hx} cy={hy} r={width / 2} fill={stroke} filter={`url(#${shadowId})`} />
+        </>
       )}
     </>
   );
